@@ -10,7 +10,7 @@ SRCS_DIR	=	srcs/
 OBJS_DIR	=	objs/
 SRCS		=	main.c \
 			parsing.c \
-			thread_manager \
+			thread_manager.c \
 			utils.c
 
 OBJS		=	$(addprefix $(OBJS_DIR), $(SRCS:.c=.o))
