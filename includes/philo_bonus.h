@@ -60,6 +60,7 @@ typedef struct s_data t_data;
 
 typedef struct s_philo
 {
+	time_t		time_start;
 	int				id_philo;
 	int				meals_eaten;
 	time_t		time_last_meal;
@@ -71,14 +72,13 @@ typedef struct s_philo
 
 typedef struct s_data
 {
-	time_t	time_start;
 	int			nb_of_philo;
 	int			time_to_die;
 	int			time_to_eat;
 	int			time_to_sleep;
 	int			nb_of_meals;
 	int			*pid;
-	t_mutex	is_end_mutex;
+	sem_t		*limit;
 	sem_t		*end_diner;
 	sem_t		*philo_dead;
 	sem_t		*forks;

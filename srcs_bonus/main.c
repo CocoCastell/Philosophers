@@ -12,6 +12,8 @@
 
 #include "../includes/philo_bonus.h"
 
+void  kill_all(t_data *data);
+
 int     main(int argc, char *argv[])
 {
         t_data  *data;
@@ -27,6 +29,6 @@ int     main(int argc, char *argv[])
 	// 	one_philo_routine(data);
         if (diner_table(data) != 0)
                 return (clear_all(data), 4);
-        clear_all(data);
+        // kill_all(data);
         return (EXIT_SUCCESS);
 }

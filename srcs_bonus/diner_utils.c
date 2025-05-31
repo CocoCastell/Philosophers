@@ -35,6 +35,23 @@ void  wait_philos(t_data *data)
   
 }
 
+void  kill_all(t_data *data)
+{
+  int       i;
+
+  i = 0;
+  while (i < data->nb_of_philo)
+  {
+    if (data->pid[i] > 0)
+    {
+        kill(data->pid[i], SIGKILL);
+        waitpid(data->pid[i], NULL, 0);
+    }
+    i++;
+  }
+}
+
+
 void  *kill_philos(void *args)
 {
   int       i;
@@ -60,42 +77,43 @@ void    print_action(t_philo *philo, char *action)
     time_t	timestamp;
 
     sem_wait(philo->infos->write);
-	timestamp = get_time_in_ms() - philo->infos->time_start;
-    printf("%ld %d %s \n", timestamp, philo->id_philo, action);
+	timestamp = get_time_in_ms() - philo->time_start;
+    printf(GREEN"[%ld] "BL"%d "DEF"%s \n", timestamp, philo->id_philo, action);
     sem_post(philo->infos->write);
-}
-
-void	synchronise_processes(t_data *data)
-{
-	while (data->time_start > get_time_in_ms())
-		continue ;
 }
 
 void    *is_dead(void *args)
 {
     time_t  time;
-    t_philo *philo;
     time_t  last_meal;
+    t_philo *philo;
 
     philo = (t_philo *)args;
+   /* 	while (true)
+	{
+		sem_wait(philo->infos->philo_dead);
+		if (get_time_in_ms() - philo->time_last_meal > philo->infos->time_to_die)
+		{
+			print_action(philo, RED"died"DEF);
+			sem_wait(philo->infos->write);
+			exit(EXIT_SUCCESS);
+		}
+		sem_post(philo->infos->philo_dead);
+	}
+    return (NULL); */
     while (true)
     {
-        // sem_wait(philo->infos->philo_dead);
-        // time = get_time_in_ms() - philo->infos->time_start;
-        // last_meal = philo->time_last_meal;
         time = get_time_in_ms(); //- philo->infos->time_start;
         last_meal = get_long(&philo->meal_time, &philo->time_last_meal);
-        // last_meal = philo->time_last_meal;
-        // printf("time : %ld, last meal: %ld, tot: %ld\n", time, last_meal, time - last_meal);
         if (time - last_meal > philo->infos->time_to_die)
         {
-            // printf("check\n");
-            // sem_wait(philo->infos->philo_dead);
-	        sem_post(philo->infos->end_diner);
+            // printf("last meal: %ld, time: %ld, tot: %ld\n", last_meal, time, time - last_meal);
+            // printf(RED"%ld %d %s\n"DEF, time - philo->time_start, philo->id_philo, DIED);
+            sem_wait(philo->infos->philo_dead);
             print_action(philo, DIED);
+	          sem_post(philo->infos->end_diner);
             clear_process(philo->infos);
         }
-        // sem_post(philo->infos->philo_dead);
         ft_usleep(1);
     }
     exit(0);

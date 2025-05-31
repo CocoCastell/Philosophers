@@ -12,10 +12,10 @@
 
 #include "../includes/philo_bonus.h"
 
-void	init_meal_time(t_philo *philo)
-{
-	return (set_long(get_time_in_ms() - philo->infos->time_start, &philo->time_last_meal, &philo->meal_time));
-}
+// void	init_meal_time(t_philo *philo)
+// {
+// 	return (set_long(get_time_in_ms() - philo->infos->time_start, &philo->time_last_meal, &philo->meal_time));
+// }
 
 t_philo	*init_philo(int nb_of_philo, t_data *infos)
 {
@@ -32,6 +32,10 @@ t_philo	*init_philo(int nb_of_philo, t_data *infos)
 		philos[i].meals_eaten = 0;
 		philos[i].time_last_meal = 0;
 		philos[i].infos = infos;
+		if (safe_mutex_handler(MUTEX_INIT, &philos[i].meals_mutex) != 0)
+			return (free(philos), NULL);
+		if (safe_mutex_handler(MUTEX_INIT, &philos[i].meal_time) != 0)
+			return (free(philos), NULL);
 	}
 	return (philos);
 }
@@ -39,8 +43,13 @@ t_philo	*init_philo(int nb_of_philo, t_data *infos)
 int	init_semaphores(t_data *data)
 {
 	int	philo_nb;
-
+	int	limit;
+	
 	philo_nb = data->nb_of_philo;
+	if (philo_nb % 2 == 0)
+		limit = philo_nb / 2;
+	else
+		limit = (philo_nb + 1) / 2;
 	sem_unlink("/forks");
 	data->forks = sem_open("/forks", O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, philo_nb);
 	if (data->forks == SEM_FAILED)
@@ -57,6 +66,10 @@ int	init_semaphores(t_data *data)
 	data->end_diner = sem_open("/end_diner", O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, 0);
 	if (data->end_diner == SEM_FAILED)
 		return (printf("Error: failed to create semaphore for end diner.\n"), 1);
+	sem_unlink("/limit");
+	data->limit = sem_open("/limit", O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, limit);
+	if (data->limit == SEM_FAILED)
+		return (printf("Error: failed to create semaphore for limit.\n"), 1);
 	return (0);
 }
 
@@ -67,8 +80,6 @@ t_data	*init_data(char *argv[], int nb_of_arg)
 	data = malloc(sizeof(t_data));
 	if (data == NULL)
 		return (NULL);
-	if (safe_mutex_handler(MUTEX_INIT, &data->is_end_mutex) != 0)
-		return (free(data), NULL);
 	data->nb_of_philo = (int)ft_atol(argv[1], NULL);
 	data->time_to_die = (int)ft_atol(argv[2], NULL);
 	data->time_to_eat = (int)ft_atol(argv[3], NULL);
