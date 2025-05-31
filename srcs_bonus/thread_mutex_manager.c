@@ -70,13 +70,6 @@ int	safe_thread_handler(t_opcode opcode, pthread_t *thread, t_philo *philo, void
 
   if (opcode == PTHREAD_CREATE && thread_err_handler(pthread_create(thread, NULL, routine, philo), opcode) == 1)
     return (1);
-  else if (opcode == PTHREAD_JOIN)
-  {
-    if (thread_err_handler(pthread_join(*thread, &output), opcode) == 1)
-      return (1);
-    error = (int)(intptr_t)output;
-    return (error);  
-  } 
   else if (opcode == PTHREAD_DETACH && thread_err_handler(pthread_detach(*thread), opcode) == 1)
     return (1);
   return (0);

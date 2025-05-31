@@ -12,11 +12,6 @@
 
 #include "../includes/philo_bonus.h"
 
-// void	init_meal_time(t_philo *philo)
-// {
-// 	return (set_long(get_time_in_ms() - philo->infos->time_start, &philo->time_last_meal, &philo->meal_time));
-// }
-
 t_philo	*init_philo(int nb_of_philo, t_data *infos)
 {
 	t_philo	*philos;
@@ -32,8 +27,6 @@ t_philo	*init_philo(int nb_of_philo, t_data *infos)
 		philos[i].meals_eaten = 0;
 		philos[i].time_last_meal = 0;
 		philos[i].infos = infos;
-		if (safe_mutex_handler(MUTEX_INIT, &philos[i].meals_mutex) != 0)
-			return (free(philos), NULL);
 		if (safe_mutex_handler(MUTEX_INIT, &philos[i].meal_time) != 0)
 			return (free(philos), NULL);
 	}
@@ -43,33 +36,20 @@ t_philo	*init_philo(int nb_of_philo, t_data *infos)
 int	init_semaphores(t_data *data)
 {
 	int	philo_nb;
-	int	limit;
 	
 	philo_nb = data->nb_of_philo;
-	if (philo_nb % 2 == 0)
-		limit = philo_nb / 2;
-	else
-		limit = (philo_nb + 1) / 2;
-	sem_unlink("/forks");
 	data->forks = sem_open("/forks", O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, philo_nb);
-	if (data->forks == SEM_FAILED)
-			return (printf("Error: failed to create semaphore for forks.\n"), 1);
-	sem_unlink("/philo_dead"); //inutile ?
 	data->philo_dead = sem_open("/philo_dead", O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, 1);
-	if (data->philo_dead == SEM_FAILED)
-		return (printf("Error: failed to create semaphore for dead philo.\n"), 1);
-	sem_unlink("/write");
 	data->write = sem_open("/write", O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, 1);
-	if (data->write == SEM_FAILED)
-		return (printf("Error: failed to create semaphore for write.\n"), 1);
-	sem_unlink("/end_diner");
 	data->end_diner = sem_open("/end_diner", O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, 0);
-	if (data->end_diner == SEM_FAILED)
-		return (printf("Error: failed to create semaphore for end diner.\n"), 1);
+	data->limit = sem_open("/limit", O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, philo_nb / 2);
+	sem_unlink("/forks");
+	sem_unlink("/philo_dead");
+	sem_unlink("/write");
+	sem_unlink("/end_diner");
 	sem_unlink("/limit");
-	data->limit = sem_open("/limit", O_CREAT | O_EXCL, S_IRUSR | S_IWUSR, limit);
-	if (data->limit == SEM_FAILED)
-		return (printf("Error: failed to create semaphore for limit.\n"), 1);
+	if (data->limit == SEM_FAILED || data->end_diner == SEM_FAILED || data->write == SEM_FAILED || data->philo_dead == SEM_FAILED || data->forks == SEM_FAILED)
+		return (printf("Error: failed to create semaphore.\n"), 1);
 	return (0);
 }
 
@@ -87,6 +67,8 @@ t_data	*init_data(char *argv[], int nb_of_arg)
 	data->nb_of_meals = -1;
 	if (nb_of_arg == 5)
 		data->nb_of_meals = (int)ft_atol(argv[5], NULL);
+	if (data->nb_of_meals == 0)
+		return (free(data), printf("Error: Number of meals must be greater than 0.\n"), NULL);
 	data->pid = malloc(sizeof(pid_t) * data->nb_of_philo);
 	if (data->pid == NULL )
 		return (free(data), NULL);

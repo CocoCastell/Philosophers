@@ -14,30 +14,35 @@
 
 int	take_fork(t_mutex *first_fork, t_mutex *second_fork, t_philo *philo)
 {
-	time_t	timestamp;
-
 	if (safe_mutex_handler(MUTEX_LOCK, first_fork) != 0)
 		return (1); 
-	timestamp = get_time_in_ms() - philo->infos->time_start;
-	printf("%ld %d has taken a fork\n", timestamp, philo->id_philo);
-	timestamp = get_time_in_ms() - philo->infos->time_start;
+	print_action(philo, "has taken a fork", true);
 	if (safe_mutex_handler(MUTEX_LOCK, second_fork) != 0)
 		return (safe_mutex_handler(MUTEX_UNLOCK, first_fork), 1);
-	printf("%ld %d has taken a fork\n", timestamp, philo->id_philo);
+	print_action(philo, "has taken a fork", true);
 	return (0);
 }
 
-int	destroy_forks(t_mutex *forks, int nb_of_forks)
+void	ft_usleep(size_t milliseconds, t_data *data)
 {
-	int	i;
+	size_t	start;
+	int			error;
 
-	i = -1;
-	while (++i < nb_of_forks)
+	start = get_time_in_ms();
+	while (get_bool(&data->is_end_mutex, &data->is_end_sim, &error) == false)
 	{
-		if (safe_mutex_handler(MUTEX_DESTROY, &forks[i]) != 0)
-			return (1);
+		if (get_time_in_ms() - start >= milliseconds)
+			return ;
+		usleep(500);
 	}
-	return (0);
+}
+
+time_t	get_time_in_ms(void)
+{
+	struct timeval	tv;
+
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
 }
 
 void	synchronise_threads(t_data *data)
@@ -51,23 +56,11 @@ void	de_synchronise_threads(t_philo *philo)
 	if (philo->infos->nb_of_philo % 2 == 0)
 	{
 		if (philo->id_philo % 2 == 0)
-			ft_usleep(30);
+			ft_usleep(40, philo->infos);
 	}
 	else
 	{
 		if (philo->id_philo % 2)
 			thinking_routine(philo);
 	}
-}
-
-void	one_philo_routine(t_data *data)
-{
-	t_philo	*philo;
-
-	philo = &data->philos[0];
-	safe_mutex_handler(MUTEX_LOCK, philo->left_fork);
-	printf("%d %d has taken a fork\n", 0, philo->id_philo);
-	ft_usleep(data->time_to_die);
-  printf(RED"%d %d died\n"DEF, data->time_to_die , philo->id_philo);
-	safe_mutex_handler(MUTEX_UNLOCK, philo->left_fork);
 }

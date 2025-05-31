@@ -12,6 +12,18 @@
 
 #include "../includes/philo.h"
 
+void	one_philo_routine(t_data *data)
+{
+	t_philo	*philo;
+
+	philo = &data->philos[0];
+	safe_mutex_handler(MUTEX_LOCK, philo->left_fork);
+	printf(GREEN"[0]"BL" 1 "DEF"has taken a fork\n");
+	ft_usleep(data->time_to_die, data);
+  printf(GREEN"[%d]"BL" 1 "RED"died\n"DEF, data->time_to_die);
+	safe_mutex_handler(MUTEX_UNLOCK, philo->left_fork);
+}
+
 int	main(int argc, char *argv[])
 {
 	t_data	*data;

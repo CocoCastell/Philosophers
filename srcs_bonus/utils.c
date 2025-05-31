@@ -12,40 +12,48 @@
 
 #include "../includes/philo_bonus.h"
 
-void	clear_all(t_data *data)
+void exit_error(t_philo *philo, const char *message)
 {
-	sem_unlink("/philo_dead");
-	sem_unlink("/forks");
-	sem_unlink("/write");
-	sem_unlink("/end_diner");
-	free(data->philos);
-	free(data->pid);
-	free(data);
-	exit(0);
+  if (message != NULL)
+  {
+    sem_wait(philo->infos->write);
+    printf("%s\n", message);
+    sem_post(philo->infos->write);
+  }
+  clear_all(philo->infos);
+  exit(EXIT_FAILURE);
 }
 
-void	clear_process(t_data *data)
+void	clear_all(t_data *data)
 {
+	int	i;
+
+	i = -1;
 	sem_close(data->philo_dead);
 	sem_close(data->forks);
 	sem_close(data->write);
 	sem_close(data->end_diner);
+	sem_close(data->limit);
+	while (++i < data->nb_of_philo)
+		safe_mutex_handler(MUTEX_DESTROY, &data->philos[i].meal_time);
 	free(data->philos);
 	free(data->pid);
 	free(data);
-	exit(0);
 }
 
-void    set_long(long value, long *target, t_mutex *mutex)
+int	set_long(long value, long *target, t_mutex *mutex)
 {
-	safe_mutex_handler(MUTEX_LOCK, mutex);
+	if (safe_mutex_handler(MUTEX_LOCK, mutex) != 0)
+		return (1);
 	*target = value;
-	safe_mutex_handler(MUTEX_UNLOCK, mutex);
+	if (safe_mutex_handler(MUTEX_UNLOCK, mutex) != 0)
+		return (1);
+	return (0);
 }
 
 time_t get_long(t_mutex *mutex, time_t *target)
 {
-	time_t value;
+	time_t	value;
 
 	safe_mutex_handler(MUTEX_LOCK, mutex);
 	value = *target;
@@ -55,7 +63,7 @@ time_t get_long(t_mutex *mutex, time_t *target)
 
 time_t	get_time_in_ms(void)
 {
-	struct timeval tv;
+	struct timeval	tv;
 
 	gettimeofday(&tv, NULL);
 	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);

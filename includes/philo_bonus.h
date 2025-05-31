@@ -28,12 +28,8 @@
 # include <fcntl.h>
 # include <sys/stat.h>
 
-# define FORK "has taken a fork"
-# define EAT "is eating"
-# define SLEEP "is sleeping"
-# define THINK "is thinking"
-# define DIED "died"
-
+# define CYAN "\033[1;36m"
+# define PURPLE "\033[1;35m"
 # define RED "\033[1;31m"
 # define GREEN "\033[1;32m"
 # define YELLOW "\033[1;33m"
@@ -61,13 +57,11 @@ typedef struct s_data t_data;
 typedef struct s_philo
 {
 	time_t		time_start;
+	time_t		time_last_meal;
 	int				id_philo;
 	int				meals_eaten;
-	time_t		time_last_meal;
-	t_mutex		meals_mutex;
 	t_mutex		meal_time;
 	t_data		*infos;
-	pthread_t	thread;
 }	t_philo;
 
 typedef struct s_data
@@ -91,23 +85,21 @@ typedef struct s_data
 // Init
 t_data	*init_data(char *argv[], int nb_of_arg);
 t_philo	*init_philo(int nb_of_philo, t_data *infos);
-void		init_meal_time(t_philo *philo);
 int			init_forks(t_mutex *forks, int nb_of_forks);
 
 // Diner manager
+void  *is_dead(void *args);
 void	eating_routine(t_philo *philo);
-void	sleeping_routine(t_philo *philo);
-void	thinking_routine(t_philo *philo);
+void	sleeping_thinking_routine(t_philo *philo);
 void	philo_routine(t_philo *philo);
 int		diner_table(t_data *data);
 
 // Diner utils
-void  *is_dead(void *args);
-void	*kill_philos(void *args);
-void	one_philo_routine(t_data *data); // TODO
-void	ft_usleep(size_t milliseconds);
 void	print_action(t_philo *philo, char *action);
+void	*kill_philos(void *args);
+void 	kill_all(t_data *data, int limit);
 void	wait_philos(t_data *data);
+void	ft_usleep(size_t milliseconds);
 
 // Parsing
 int		parse_args(char *argv[]);
@@ -116,10 +108,9 @@ long	ft_atol(const char *str, int *error);
 // Utils
 time_t	get_time_in_ms(void);
 time_t	get_long(t_mutex *mutex, time_t *target);
-void		set_long(long value, long *target, t_mutex *mutex);
 void		clear_all(t_data *data);
-void		clear_process(t_data *data);
-void		synchronise_processes(t_data *data);
+void		exit_error(t_philo *philo, const char *message);
+int			set_long(long value, long *target, t_mutex *mutex);
 
 // Error management
 int	thread_error_handler(int error, t_opcode opcode);

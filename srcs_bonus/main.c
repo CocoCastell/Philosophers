@@ -12,7 +12,13 @@
 
 #include "../includes/philo_bonus.h"
 
-void  kill_all(t_data *data);
+void one_philo_routine(t_data *data)
+{
+    sem_wait(data->forks);
+    printf(GREEN"[0]"BL" 1 "DEF"has taken a fork\n");
+    ft_usleep(data->time_to_eat);
+    printf(GREEN"[%d]"BL" 1 "RED"died\n"DEF, data->time_to_eat);
+}
 
 int     main(int argc, char *argv[])
 {
@@ -25,10 +31,10 @@ int     main(int argc, char *argv[])
         data = init_data(argv, --argc);
         if (data == NULL)
                 return (3);
-	// if (data->nb_of_philo == 1)
-	// 	one_philo_routine(data);
-        if (diner_table(data) != 0)
-                return (clear_all(data), 4);
-        // kill_all(data);
+	if (data->nb_of_philo == 1)
+		one_philo_routine(data);
+        else
+                diner_table(data);
+        clear_all(data);
         return (EXIT_SUCCESS);
 }

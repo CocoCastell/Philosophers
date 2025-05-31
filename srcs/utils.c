@@ -14,24 +14,30 @@
 
 void	clear_all(t_data *data)
 {
-	free(data->forks);
-	free(data->philos);
-	free(data);
+	int	i;
+
+	i = -1;
+	safe_mutex_handler(MUTEX_DESTROY, &data->print_mutex);
+	safe_mutex_handler(MUTEX_DESTROY, &data->data_mutex);
+	safe_mutex_handler(MUTEX_DESTROY, &data->is_end_mutex);
+	while (++i < data->nb_of_philo)
+	{
+		safe_mutex_handler(MUTEX_DESTROY, &data->philos[i].meals_mutex);
+		safe_mutex_handler(MUTEX_DESTROY, &data->philos[i].meal_time);
+		safe_mutex_handler(MUTEX_DESTROY, &data->forks[i]);
+	}
+	if (data->forks != NULL)
+		free(data->forks);
+	if (data->philos != NULL)
+		free(data->philos);
+	if (data != NULL)
+		free(data);
 }
 
-void	ft_usleep(size_t milliseconds)
+bool get_bool(t_mutex *mutex, bool *target, int *error)
 {
-	size_t	start;
-
-	start = get_time_in_ms();
-	while ((get_time_in_ms() - start) < milliseconds)
-		usleep(500);
-}
-
-bool get_bool(t_mutex *mutex, bool target, int *error)
-{
-	int tmp;
-	bool value;
+	int		tmp;
+	bool	value;
 
 	tmp = safe_mutex_handler(MUTEX_LOCK, mutex);
 	if (tmp != 0)
@@ -39,7 +45,7 @@ bool get_bool(t_mutex *mutex, bool target, int *error)
 		*error = 1;
 		return (true);
 	};
-	value = target;
+	value = *target;
 	tmp = safe_mutex_handler(MUTEX_UNLOCK, mutex);
 	if (tmp!= 0)
 	{
@@ -63,7 +69,7 @@ int	set_bool(bool value, bool *target, t_mutex *mutex)
 	return (0);
 }
 
-int get_int(t_mutex *mutex, int target, int *error)
+int get_int(t_mutex *mutex, int *target, int *error)
 {
 	int tmp;
 	int value;
@@ -74,7 +80,7 @@ int get_int(t_mutex *mutex, int target, int *error)
 		*error = 1;
 		return (0);
 	};
-	value = target;
+	value = *target;
 	tmp = safe_mutex_handler(MUTEX_UNLOCK, mutex);
 	if (tmp != 0)
 	{
@@ -96,12 +102,4 @@ int	set_int(int value, int *target, t_mutex *mutex)
 	if (error != 0)
 		return (1);
 	return (0);
-}
-
-time_t	get_time_in_ms(void)
-{
-	struct timeval tv;
-
-	gettimeofday(&tv, NULL);
-	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
 }

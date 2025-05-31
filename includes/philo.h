@@ -28,6 +28,8 @@
 # define RED "\033[1;31m"
 # define GREEN "\033[1;32m"
 # define YELLOW "\033[1;33m"
+# define CYAN "\033[1;36m"
+# define PURPLE "\033[1;35m"
 # define BL "\033[94m"
 # define DEF "\033[0m"
 
@@ -72,6 +74,7 @@ typedef struct s_data
 	int			nb_of_meals;
 	int			nb_of_full_philo;
 	bool		is_end_sim;
+	t_mutex	print_mutex;
 	t_mutex	data_mutex;
 	t_mutex	is_end_mutex;
 	t_mutex	*forks;
@@ -94,16 +97,17 @@ void	thinking_routine(t_philo *philo);
 void	*philo_routine(void *args);
 
 // Diner utils
-int		destroy_forks(t_mutex *forks, int nb_of_forks);
 int		take_fork(t_mutex *first_fork, t_mutex *second_fork, t_philo *philo);
 void	synchronise_threads(t_data *data);
 void	de_synchronise_threads(t_philo *philo);
-void	one_philo_routine(t_data *data);
+void	clear_all(t_data *data);
+void	ft_usleep(size_t milliseconds, t_data *data);
 
 // State tracking
 bool	is_full(t_philo *philo, int *error);
 void	*state_tracker(void *args);
 int		check_if_dead(t_philo *philo, int *error);
+void	print_action(t_philo *philo, const char *messgae, bool is_action);
 
 // Parsing
 int		parse_args(char *argv[]);
@@ -111,12 +115,10 @@ long	ft_atol(const char *str, int *error);
 
 // Utils
 time_t	get_time_in_ms(void);
-bool		get_bool(t_mutex *mutex, bool target, int *error);
+bool		get_bool(t_mutex *mutex, bool *target, int *error);
 int			set_bool(bool value, bool *target, t_mutex *mutex);
-int			get_int(t_mutex *mutex, int target, int *error);
+int			get_int(t_mutex *mutex, int *target, int *error);
 int			set_int(int value, int *target, t_mutex *mutex);
-void		clear_all(t_data *data);
-void		ft_usleep(size_t milliseconds);
 
 // Error management
 int	thread_error_handler(int error, t_opcode opcode);

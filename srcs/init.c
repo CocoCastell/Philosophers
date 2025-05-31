@@ -35,7 +35,7 @@ t_philo	*init_philo(int nb_of_philo, t_mutex *forks, t_data *infos)
 		philos[i].left_fork = &forks[i];
 		philos[i].right_fork = &forks[(i + 1) % nb_of_philo];
 		if (safe_mutex_handler(MUTEX_INIT, &philos[i].meals_mutex) != 0 || safe_mutex_handler(MUTEX_INIT, &philos[i].meal_time) != 0)
-			return (free(philos), NULL);
+			return (NULL);
 	}
 	return (philos);
 }
@@ -64,8 +64,8 @@ t_data	*init_data(char *argv[], int nb_of_arg)
 	data = malloc(sizeof(t_data));
 	if (data == NULL)
 		return (NULL);
-	if (safe_mutex_handler(MUTEX_INIT, &data->is_end_mutex) != 0)
-		return (free(data), NULL);
+	if (safe_mutex_handler(MUTEX_INIT, &data->is_end_mutex) != 0 || safe_mutex_handler(MUTEX_INIT, &data->print_mutex) != 0 || safe_mutex_handler(MUTEX_INIT, &data->data_mutex) != 0)
+		return (NULL);
 	data->nb_of_philo = (int)ft_atol(argv[1], NULL);
 	data->time_to_die = (int)ft_atol(argv[2], NULL);
 	data->time_to_eat = (int)ft_atol(argv[3], NULL);
@@ -75,12 +75,14 @@ t_data	*init_data(char *argv[], int nb_of_arg)
 	data->nb_of_meals = -1;
 	if (nb_of_arg == 5)
 		data->nb_of_meals = (int)ft_atol(argv[5], NULL);
+	if (data->nb_of_meals == 0)
+		return (printf("Error: Number of meals must be greater than 0.\n"), NULL);
 	data->forks = init_fork(data->nb_of_philo);
 	if (data->forks == NULL)
-		return (free(data), NULL);
+		return (NULL);
 	data->philos = init_philo(data->nb_of_philo, data->forks, data);
 	if (data->philos == NULL)
-		return (free(data->forks), free(data), NULL);
+		return (NULL);
 	return (data);
 }
 

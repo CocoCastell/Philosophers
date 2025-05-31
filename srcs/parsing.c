@@ -15,7 +15,7 @@
 long	ft_atol(const char *str, int *error)
 {
 	long	result;
-	int	sign;
+	int		sign;
 
 	sign = 1;
 	result = 0;
@@ -39,8 +39,8 @@ long	ft_atol(const char *str, int *error)
 
 int	parse_args(char *argv[])
 {
-	int	i;
-	int	error;
+	int		i;
+	int		error;
 	long	nb;
 
 	i = 1;
