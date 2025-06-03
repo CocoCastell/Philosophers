@@ -6,11 +6,11 @@
 /*   By: cochatel <cochatel@student.42barcelona.com> +#+  +:+       +#+       */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/24 17:11:14 by cochatel          #+#    #+#             */
-/*   Updated: 2025/06/03 14:08:11 by cochatel         ###   ########.fr       */
+/*   Updated: 2025/06/03 11:53:40 by cochatel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/philo.h"
+#include "../includes/philo_bonus.h"
 
 long	ft_atol(const char *str, int *error)
 {
