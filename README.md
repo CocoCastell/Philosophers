@@ -13,8 +13,8 @@ make bonus
 ```
 Then, run the programm with 4 or 5 arguments
 ```
-./pipex 5 800 200 200
-./pipex_bonus 4 410 200 200 5
+./philo 5 800 200 200
+./philo_bonus 4 410 200 200 5
 ```
 # Implementation
 
