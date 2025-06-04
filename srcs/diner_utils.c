@@ -6,7 +6,7 @@
 /*   By: cochatel <cochatel@student.42barcelona.com> +#+  +:+       +#+       */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/24 17:11:14 by cochatel          #+#    #+#             */
-/*   Updated: 2025/06/03 14:08:02 by cochatel         ###   ########.fr       */
+/*   Updated: 2025/06/04 15:41:58 by cochatel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,24 +43,4 @@ time_t	get_time_in_ms(void)
 
 	gettimeofday(&tv, NULL);
 	return (tv.tv_sec * 1000 + tv.tv_usec / 1000);
-}
-
-void	synchronise_threads(t_data *data)
-{
-	while (data->time_start > get_time_in_ms())
-		continue ;
-}
-
-void	de_synchronise_threads(t_philo *philo)
-{
-	if (philo->infos->nb_of_philo % 2 == 0)
-	{
-		if (philo->id_philo % 2 == 0)
-			ft_usleep(40, philo->infos);
-	}
-	else
-	{
-		if (philo->id_philo % 2)
-			thinking_routine(philo);
-	}
 }

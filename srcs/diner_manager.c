@@ -6,7 +6,7 @@
 /*   By: cochatel <cochatel@student.42barcelona.com> +#+  +:+       +#+       */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/24 17:11:14 by cochatel          #+#    #+#             */
-/*   Updated: 2025/06/03 16:51:42 by cochatel         ###   ########.fr       */
+/*   Updated: 2025/06/04 15:43:16 by cochatel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ void	thinking_routine(t_philo *philo)
 	time_to_think = philo->infos->time_to_eat * 2 - philo->infos->time_to_sleep;
 	if (time_to_think < 0)
 		time_to_think = 0;
-	ft_usleep(time_to_think * 0.4444, philo->infos);
+	ft_usleep(time_to_think * 0.4, philo->infos);
 }
 
 void	*philo_routine(void *args)
@@ -59,8 +59,6 @@ void	*philo_routine(void *args)
 	philo = (t_philo *)args;
 	if (init_meal_time(philo) != 0)
 		error = 1;
-	synchronise_threads(philo->infos);
-	de_synchronise_threads(philo);
 	while (check_if_dead(philo, &error) == false && error != 1)
 	{
 		if (eating_routine(philo) == 1)
@@ -83,16 +81,17 @@ int	diner_table(t_data *data, int t)
 
 	error[0] = 0;
 	error[1] = 0;
-	data->time_start = get_time_in_ms() + (data->nb_of_philo * 6 / 2) + 20;
-	if (safe_th_handle(PTHREAD_CREATE, &th_state, data->philos, watchdog) != 0)
-		return (1);
+	data->time_start = get_time_in_ms();
 	while (++t < data->nb_of_philo)
 	{
 		error[0] = safe_th_handle(PTHREAD_CREATE, &data->philos[t].thread, \
 				&data->philos[t], philo_routine);
 		if (error[0] == 1)
 			break ;
+		usleep(50);
 	}
+	if (safe_th_handle(PTHREAD_CREATE, &th_state, data->philos, watchdog) != 0)
+		return (1);
 	while (--t >= 0)
 	{
 		error[1] = safe_th_handle(PTHREAD_JOIN, &data->philos[t].thread \
@@ -101,6 +100,5 @@ int	diner_table(t_data *data, int t)
 			break ;
 	}
 	set_bool(true, &data->is_end_sim, &data->is_end_mutex);
-	pthread_join(th_state, NULL);
-	return (error[0] || error[1]);
+	return (pthread_join(th_state, NULL) || error[0] || error[1]);
 }

@@ -6,7 +6,7 @@
 /*   By: cochatel <cochatel@student.42barcelona.com>+#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/10 14:47:37 by cochatel          #+#    #+#             */
-/*   Updated: 2025/06/03 16:56:15 by cochatel         ###   ########.fr       */
+/*   Updated: 2025/06/04 15:37:20 by cochatel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,17 +58,9 @@ void	eating_routine(t_philo *philo)
 
 void	sleeping_thinking_routine(t_philo *philo)
 {
-	time_t	time_to_think;
-
 	print_action(philo, PURPLE"is sleeping"DEF);
 	ft_usleep(philo->infos->time_to_sleep);
 	print_action(philo, YELLOW"is thinking"DEF);
-	if (philo->id_philo % 2 != 0)
-		return ;
-	time_to_think = philo->infos->time_to_eat * 2 - philo->infos->time_to_sleep;
-	if (time_to_think < 0)
-		time_to_think = 0;
-	ft_usleep(time_to_think * 0.4444);
 }
 
 void	philo_routine(t_philo *philo)

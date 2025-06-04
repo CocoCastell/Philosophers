@@ -6,7 +6,7 @@
 /*   By: cochatel <cochatel@student.42barcelona.com> +#+  +:+       +#+       */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/24 17:11:14 by cochatel          #+#    #+#             */
-/*   Updated: 2025/06/03 16:55:30 by cochatel         ###   ########.fr       */
+/*   Updated: 2025/06/04 15:46:03 by cochatel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,10 +70,12 @@ static bool	is_dead(t_philo *philo, int *error)
 		if (timestamp - last_meal_time >= philo[i].infos->time_to_die && \
 				!is_full(&philo[i], error))
 		{
-			print_action(&philo[i], RED"died"DEF, true);
+			safe_mutex_handler(MUTEX_LOCK, &philo->infos->print_mutex);
+			printf(RED"[%ld] %d died\n"DEF, timestamp, philo->id_philo);
 			if (set_bool(true, &philo->infos->is_end_sim, \
-						&philo->infos->is_end_mutex) != 0)
+					&philo->infos->is_end_mutex) != 0)
 				*error = 1;
+			safe_mutex_handler(MUTEX_UNLOCK, &philo->infos->print_mutex);
 			return (true);
 		}
 	}
@@ -87,7 +89,6 @@ void	*watchdog(void *args)
 
 	philo = (t_philo *)args;
 	error = 0;
-	synchronise_threads(philo->infos);
 	while (get_bool(&philo->infos->is_end_mutex, &philo->infos->is_end_sim, \
 				&error) == false && error == 0)
 	{
